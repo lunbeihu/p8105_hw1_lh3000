@@ -15,7 +15,7 @@ library(tidyverse)
 
 Created a data frame with specified elements.
 
-```{r}
+```{r df}
 prob1_df =
   tibble(
     samp = rnorm(10),
@@ -27,7 +27,7 @@ prob1_df =
 
 Take the mean of each variable in my data frame.
 
-```{r}
+```{r mean}
 mean(pull(prob1_df, samp))
 mean(pull(prob1_df, samp_gt_0))
 mean(pull(prob1_df, char_vec))
@@ -36,11 +36,52 @@ mean(pull(prob1_df, factor_vec))
 
 I can take the mean of numbers and logical but not character or factor.
 
-```{r}
+```{r as.numeric, results = "hide", warning=FALSE}
 as.numeric(pull(prob1_df, samp))
 as.numeric(pull(prob1_df, samp_gt_0))
 as.numeric(pull(prob1_df, char_vec))
 as.numeric(pull(prob1_df, factor_vec))
 ```
 
+The character vector cannot be returned as number, with the warning "NAs introduced by coercion." The factor vector can be returned as number 2 3 1 with our coercion. Since character and factor cannot be converted (or can be converted but with coercion) into number, we cannot get their means.
+
+Here is the conversion for the logical variable to 1) numeric, 2) factor and 3) first factor then numeric, and the results are multiplied by the random sample.
+
+```{r conversion}
+as.numeric(pull(prob1_df, samp_gt_0)) * pull(prob1_df, samp)
+as.factor(pull(prob1_df, samp_gt_0)) * pull(prob1_df, samp)
+as.numeric(as.factor(pull(prob1_df, samp_gt_0))) * pull(prob1_df, samp)
+```
+
+
 ## Problem 2
+
+```{r import data}
+data("penguins", package = "palmerpenguins")
+```
+
+**Here is the short description of the penguins dataset:**
+
+* The dataset has `r nrow(penguins)` rows/observations and `r ncol(penguins)` columns/variables. 
+
+* The eight variables are `r names(penguins)`.
+
+* The three penguin species are `r levels(penguins$species)`, with frequencies `r filter(penguins, species == "Adelie") %>% nrow()`, `r filter(penguins, species == "Chinstrap") %>% nrow()`, and `r filter(penguins, species == "Gentoo") %>% nrow()` respectively.
+
+* The three islands are `r levels(penguins$island)`, with frequencies `r filter(penguins, island == "Biscoe") %>% nrow()`,`r filter(penguins, island == "Dream") %>% nrow()`, and `r filter(penguins, island == "Torgersen") %>% nrow()` respectively.
+
+* Four important descriptive variables are: bill length (mean `r round(mean(pull(penguins, bill_length_mm), na.rm = TRUE), digits = 2)`mm), bill depth (mean `r round(mean(pull(penguins, bill_depth_mm), na.rm = TRUE), digits = 2)`mm), flipper length (mean `r round(mean(pull(penguins, flipper_length_mm), na.rm = TRUE), digits = 2)`mm), and body mass (mean `r round(mean(pull(penguins, body_mass_g), na.rm = TRUE), digits = 2)`g).
+
+
+Next I show a scatterplot of flipper length vs bill length - different color for different penguin species.
+
+```{r yx_scatter}
+ggplot(penguins, aes(x = bill_length_mm, y = flipper_length_mm, color = species)) + geom_point()
+```
+
+Export the scatterplot to my project directory.
+
+```{r plot_export}
+ggsave("bill_flipper.pdf", height = 4, width = 4)
+```
+
